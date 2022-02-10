@@ -1,6 +1,8 @@
-import sha from 'sha1';
-import dbClient from './utils/db';
-import redisClient from './utils/redis';
+import sha1 from 'sha1';
+import dbClient from '../utils/db';
+import redisClient from '../utils/redis';
+
+const { ObjectId } = require('mongodb');
 
 class UsersController {
   static async postNew(rq, rs) {
@@ -23,12 +25,12 @@ class UsersController {
     const newUsr = {
       email: usrEmail,
       password: encPass,
-    }
+    };
     const rslt = await dbClient.users.insertOne(newUsr);
     const rtrnedUsr = {
       id: rslt.insertedId,
-      email: usrEmail
-    }
+      email: usrEmail,
+    };
     return rs.status(201).send(rtrnedUsr);
   }
 
@@ -41,10 +43,10 @@ class UsersController {
     const rtrndUsr = {
       id: usr._id,
       email: usr.email,
-    }
-    delet usr.password;
-    return rs.status(200)send(rtrndUsr);
+    };
+    delete usr.password;
+    return rs.status(200).send(rtrndUsr);
   }
 }
 
-export default UsersController
+export default UsersController;

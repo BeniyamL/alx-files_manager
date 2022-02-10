@@ -1,22 +1,22 @@
 import sha1 from 'sha1';
 import uuidv4 from 'uuid';
-import dbClient from '../utils/db'
+import dbClient from '../utils/db';
 import redisClient from '../utils/redis';
 
 class AuthController {
   static async getConnect(rq, rs) {
     const athr = rq.header('Authorization') || null;
-    if (!athr) return rs.status(401).send({ error: "Unauthorized" });
+    if (!athr) return rs.status(401).send({ error: 'Unauthorized' });
     const crdnt = athr.split(' ')[1];
-    if (!crdnt) return rs.status(401).send({ error: "Unauthorized" });
-    const emailPass = buffer.from(crdnt, 'base-64').toString('utf-8'); 
+    if (!crdnt) return rs.status(401).send({ error: 'Unauthorized' });
+    const emailPass = Buffer.from(crdnt, 'base-64').toString('utf-8');
     const fltr = {
       email: emailPass.split(':')[0],
-      password: sha1(emailPass.split(':')[1]);
-    }
+      password: sha1(emailPass.split(':')[1]),
+    };
     const usr = await dbClient.users.findOne(fltr);
     if (!usr) {
-      return rs.status(401).send({ error: "Unauthorized" });
+      return rs.status(401).send({ error: 'Unauthorized' });
     }
     const tkn = uuidv4();
     const k = `auth_${tkn}`;

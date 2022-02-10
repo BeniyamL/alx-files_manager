@@ -1,20 +1,20 @@
-import dbClient from '../utils/db';
-import redisClient from '../utils/rdis';
-import { ObjectId } from 'mongodb'
+import { ObjectId } from 'mongodb';
 import uuid4 from 'uuid';
+import { mkdir, writeFile } from 'fs';
+import dbClient from '../utils/db';
 
 class FilesController {
   static async postUpload(rq, rs) {
     const usrId = rq.headers('X-Token') || null;
     if (!usrId) return rs.status(401).send({ error: 'Unauthorized' });
-    const usr = dbClient.users.findOne( { _id: ObjectId(usrId) });
+    const usr = dbClient.users.findOne({ _id: ObjectId(usrId) });
     if (!usr) return rs.status(401).send({ error: 'Unauthorized' });
 
     const fname = rq.body.name;
-    if (!fname)  return rs.status(400).send({ error: 'Missing name' });
+    if (!fname) return rs.status(400).send({ error: 'Missing name' });
     const ftype = rq.body.type;
     const acceptType = ['folder', 'file', 'image'];
-    if (!ftype || (!acceptType.includes(ftype)) {
+    if (!ftype || (!acceptType.includes(ftype))) {
       return rs.status(400).send({ error: 'Missing type' });
     }
     const fdata = rq.body.data;
@@ -37,7 +37,7 @@ class FilesController {
       userId: usr._id,
       name: fname,
       type: ftype,
-      parentId: fparentid,
+      parentId: fparentId,
       isPublic: fisPublic,
     };
     if (ftype === 'folder') {
@@ -63,8 +63,9 @@ class FilesController {
       return true;
     });
 
-    writeFile(path, lfdat, (err) => {
+    writeFile(path, lfdata, (err) => {
       if (err) return rs.status(400).send(err.message);
+      return true;
     });
     finsert.localpath = path;
     await dbClient.files.insertOne(finsert);
@@ -75,7 +76,7 @@ class FilesController {
       type: finsert.type,
       isPublic: finsert.isPublic,
       parentId: finsert.parentId,
-    }
+    };
     return rs.status(201).send(rtrnd2);
   }
 }
